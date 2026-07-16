@@ -23,6 +23,7 @@ class ServerSettings:
     port: int = 8000
     log_level: str = "INFO"
     max_upload_mb: int = 8
+    max_image_pixels: int = 25_000_000
     allowed_mime_types: tuple[str, ...] = ("image/jpeg", "image/png", "image/webp")
 
 
@@ -71,7 +72,7 @@ class ProviderSettings:
 @dataclass(frozen=True)
 class AppSettings:
     name: str = "AI视觉辅助盲人环境理解系统"
-    version: str = "0.1.0"
+    version: str = "0.2.0"
     environment: str = "development"
     api_prefix: str = "/api/v1"
     server: ServerSettings = field(default_factory=ServerSettings)
@@ -111,6 +112,8 @@ def _validate(settings: AppSettings) -> None:
         raise SettingsError("端口必须在1到65535之间。")
     if settings.server.max_upload_mb <= 0:
         raise SettingsError("max_upload_mb 必须大于0。")
+    if settings.server.max_image_pixels <= 0:
+        raise SettingsError("max_image_pixels 必须大于0。")
     if settings.quality.min_width <= 0 or settings.quality.min_height <= 0:
         raise SettingsError("最小图片尺寸必须大于0。")
     if settings.quality.min_brightness >= settings.quality.max_brightness:
@@ -159,6 +162,10 @@ def load_settings(config_path: str | Path | None = None) -> AppSettings:
         max_upload_mb=_env_int(
             "AI_VISION_MAX_UPLOAD_MB", int(server_data.get("max_upload_mb", 8))
         ),
+        max_image_pixels=_env_int(
+            "AI_VISION_MAX_IMAGE_PIXELS",
+            int(server_data.get("max_image_pixels", 25_000_000)),
+        ),
         allowed_mime_types=tuple(
             str(item)
             for item in server_data.get(
@@ -168,7 +175,7 @@ def load_settings(config_path: str | Path | None = None) -> AppSettings:
     )
     settings = AppSettings(
         name=str(app_data.get("name", "AI视觉辅助盲人环境理解系统")),
-        version=str(app_data.get("version", "0.1.0")),
+        version=str(app_data.get("version", "0.2.0")),
         environment=os.getenv(
             "AI_VISION_ENVIRONMENT", str(app_data.get("environment", "development"))
         ),

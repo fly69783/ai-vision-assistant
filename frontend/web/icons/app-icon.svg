@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title">
+  <title id="title">视界助手图标</title>
+  <rect width="512" height="512" rx="112" fill="#0b2230"/>
+  <path d="M74 256c44-78 105-117 182-117s138 39 182 117c-44 78-105 117-182 117S118 334 74 256Z" fill="#c6e7e5"/>
+  <circle cx="256" cy="256" r="79" fill="#0c7184"/>
+  <circle cx="256" cy="256" r="33" fill="#ff6b35"/>
+  <path d="M392 153c32 24 52 60 57 103M392 359c32-24 52-60 57-103" fill="none" stroke="#f4f0e7" stroke-linecap="round" stroke-width="24"/>
+</svg>

@@ -1,0 +1,40 @@
+{
+  "id": "/",
+  "name": "视界助手｜AI环境理解",
+  "short_name": "视界助手",
+  "description": "通过拍照获得简短、可信的环境理解辅助信息。",
+  "lang": "zh-CN",
+  "dir": "ltr",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#f4f0e7",
+  "theme_color": "#0b2230",
+  "categories": ["accessibility", "utilities"],
+  "icons": [
+    {
+      "src": "/icons/app-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "概述环境",
+      "short_name": "环境概述",
+      "url": "/?task=scene_description"
+    },
+    {
+      "name": "读取文字",
+      "short_name": "读取文字",
+      "url": "/?task=read_text"
+    },
+    {
+      "name": "查找物品",
+      "short_name": "查找物品",
+      "url": "/?task=find_object"
+    }
+  ]
+}

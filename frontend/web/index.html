@@ -5,15 +5,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta
       name="description"
-      content="AI视觉辅助盲人环境理解系统的无障碍开发测试台"
+      content="通过手机拍照或上传图片，获得简短、可信的环境理解辅助信息"
     />
+    <meta name="theme-color" content="#0b2230" />
+    <meta name="color-scheme" content="light" />
+    <meta name="application-name" content="视界助手" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="视界助手" />
     <title>环境理解实验台</title>
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/icons/app-icon.svg" />
+    <link rel="manifest" href="/manifest.webmanifest" />
     <link rel="stylesheet" href="/styles.css" />
     <script src="/app.js" defer></script>
   </head>
   <body>
     <a class="skip-link" href="#main-content">跳到主要内容</a>
+
+    <div class="network-banner" id="network-banner" role="status" hidden>
+      <strong id="network-banner-title">当前处于离线状态</strong>
+      <span id="network-banner-message">仍可查看页面，但图片分析需要连接后端服务。</span>
+    </div>
 
     <header class="site-header">
       <a class="brand" href="/" aria-label="返回环境理解实验台首页">
@@ -23,19 +37,23 @@
           <small>AI VISION ASSISTANT · FOUNDATION</small>
         </span>
       </a>
-      <div class="service-state" id="service-state" role="status" aria-live="polite">
-        <span class="state-dot" aria-hidden="true"></span>
-        正在检查服务
+      <div class="header-actions">
+        <button class="header-action" id="install-button" type="button" hidden>安装到手机</button>
+        <button class="header-action" id="update-button" type="button" hidden>更新网页</button>
+        <div class="service-state" id="service-state" role="status" aria-live="polite">
+          <span class="state-dot" aria-hidden="true"></span>
+          <span id="service-state-text">正在检查服务</span>
+        </div>
       </div>
     </header>
 
-    <main id="main-content">
+    <main id="main-content" tabindex="-1">
       <section class="hero" aria-labelledby="page-title">
         <div class="hero-copy">
           <p class="eyebrow">开发阶段 · 真实状态优先</p>
           <h1 id="page-title">把画面变成<br /><em>来得及听懂</em>的信息</h1>
           <p class="hero-intro">
-            上传一张图片，选择你当前要做的事。系统会先检查画面质量，再调用已经配置的AI能力。
+            用手机拍一张或选择已有图片，再告诉系统你现在要做什么。系统会先检查画面质量，再调用已经配置的AI能力。
           </p>
         </div>
         <aside class="foundation-note" aria-label="当前版本说明">
@@ -48,27 +66,48 @@
       </section>
 
       <section class="workspace" aria-label="图片分析工作区">
-        <form class="control-panel" id="analysis-form">
+        <form class="control-panel" id="analysis-form" aria-labelledby="control-title">
           <div class="panel-heading">
             <span>01</span>
             <div>
               <p class="eyebrow">INPUT</p>
-              <h2>告诉系统你要做什么</h2>
+              <h2 id="control-title">告诉系统你要做什么</h2>
             </div>
           </div>
 
-          <label class="file-drop" for="image-file" id="file-drop">
-            <input
-              id="image-file"
-              name="file"
-              type="file"
-              accept="image/jpeg,image/png,image/webp"
-              required
-            />
-            <span class="file-icon" aria-hidden="true">＋</span>
-            <strong id="file-label">选择一张图片</strong>
-            <small>支持JPEG、PNG、WebP，最大8MB</small>
-          </label>
+          <fieldset class="image-source" id="file-drop" aria-describedby="file-help file-error">
+            <legend>获取图片</legend>
+            <div class="source-actions">
+              <label class="source-option source-camera" for="camera-file">
+                <input
+                  id="camera-file"
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  capture="environment"
+                />
+                <span class="source-icon" aria-hidden="true">◎</span>
+                <span>
+                  <strong>拍一张</strong>
+                  <small>优先使用手机后置摄像头</small>
+                </span>
+              </label>
+
+              <label class="source-option" for="image-file">
+                <input
+                  id="image-file"
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                />
+                <span class="source-icon" aria-hidden="true">＋</span>
+                <span>
+                  <strong>从相册选择</strong>
+                  <small>电脑上也可以拖放到这里</small>
+                </span>
+              </label>
+            </div>
+            <p id="file-help">支持JPEG、PNG、WebP，文件最大8MB。照片只会在点击分析后发送。</p>
+            <p class="field-error" id="file-error" role="alert" hidden></p>
+          </fieldset>
 
           <div class="field-group">
             <label for="task">任务</label>
@@ -96,9 +135,13 @@
             />
           </div>
 
-          <div class="preview-wrap is-hidden" id="preview-wrap">
+          <figure class="preview-wrap is-hidden" id="preview-wrap">
             <img id="image-preview" alt="待分析图片预览" />
-          </div>
+            <figcaption class="preview-meta">
+              <span id="file-details">已选择图片</span>
+              <button class="text-action" id="clear-image-button" type="button">清除图片</button>
+            </figcaption>
+          </figure>
 
           <button class="primary-action" id="submit-button" type="submit">
             <span>开始分析</span>
@@ -111,7 +154,7 @@
             <span>02</span>
             <div>
               <p class="eyebrow">OUTPUT</p>
-              <h2 id="result-title">系统会在这里回答</h2>
+              <h2 id="result-title" tabindex="-1">系统会在这里回答</h2>
             </div>
           </div>
 
@@ -121,7 +164,7 @@
             <small>结果会区分：分析成功、没有可靠结果、能力未配置和画面不合格。</small>
           </div>
 
-          <div class="result-content is-hidden" id="result-content" aria-live="polite" aria-atomic="true">
+          <div class="result-content is-hidden" id="result-content">
             <div class="result-status-row">
               <span class="result-badge" id="result-badge">等待</span>
               <span id="request-time"></span>
@@ -133,6 +176,7 @@
               <button class="secondary-action" id="speak-button" type="button">朗读结果</button>
               <button class="text-action" id="stop-speech-button" type="button">停止朗读</button>
             </div>
+            <p class="speech-state" id="speech-state" role="status"></p>
 
             <dl class="quality-grid" id="quality-grid"></dl>
 
@@ -148,6 +192,11 @@
           </div>
         </section>
       </section>
+
+      <aside class="privacy-strip" aria-label="图片隐私说明">
+        <span aria-hidden="true">LOCAL / PRIVATE</span>
+        <p><strong>预览留在当前设备。</strong> 离线缓存只保存网页外壳，不保存上传图片、分析请求或识别结果。</p>
+      </aside>
 
       <section class="capabilities" aria-labelledby="capability-title">
         <div>
@@ -178,5 +227,8 @@
       <p>本系统仅用于环境理解辅助，不替代盲杖、导盲犬、他人协助或专业导航设备。</p>
       <a href="/api/v1/docs">查看API文档</a>
     </footer>
+
+    <p class="visually-hidden" id="result-announcer" role="status" aria-live="assertive"></p>
+    <noscript>本网页需要启用JavaScript才能上传图片和调用分析接口。</noscript>
   </body>
 </html>

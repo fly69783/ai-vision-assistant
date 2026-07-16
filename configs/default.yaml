@@ -1,6 +1,6 @@
 app:
   name: AI视觉辅助盲人环境理解系统
-  version: 0.1.0
+  version: 0.2.0
   environment: development
   api_prefix: /api/v1
 
@@ -9,6 +9,7 @@ server:
   port: 8000
   log_level: INFO
   max_upload_mb: 8
+  max_image_pixels: 25000000
   allowed_mime_types:
     - image/jpeg
     - image/png

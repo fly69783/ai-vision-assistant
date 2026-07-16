@@ -8,6 +8,7 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
 from app.api.router import api_router
+from app.middleware import ResponsePolicyMiddleware
 from core.config.settings import AppSettings, load_settings
 from core.observability import configure_logging
 from core.providers import ProviderRegistry, build_default_registry
@@ -31,6 +32,7 @@ def create_app(
     )
     application.state.settings = selected
     application.state.orchestrator = AnalysisOrchestrator(selected, registry)
+    application.add_middleware(ResponsePolicyMiddleware, api_prefix=selected.api_prefix)
     application.include_router(api_router, prefix=selected.api_prefix)
 
     frontend_dir = Path(__file__).resolve().parents[1] / "frontend" / "web"

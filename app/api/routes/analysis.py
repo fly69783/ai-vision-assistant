@@ -10,6 +10,7 @@ from app.dependencies import get_orchestrator, get_settings
 from core.config.settings import AppSettings
 from core.domain.enums import TaskType
 from core.domain.models import AnalysisResponse
+from core.services.image_validation import detect_image_mime, image_pixel_count
 from core.services.orchestrator import AnalysisOrchestrator
 
 router = APIRouter()
@@ -30,9 +31,11 @@ async def analyze_image(
             status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
             detail=f"不支持{content_type or '未知'}格式，请上传JPEG、PNG或WebP图片。",
         )
-    if task is TaskType.VISUAL_QUESTION and not query:
+    normalized_query = query.strip() if query else None
+    normalized_target = target.strip() if target else None
+    if task is TaskType.VISUAL_QUESTION and not normalized_query:
         raise HTTPException(status_code=422, detail="视觉追问任务必须填写问题。")
-    if task is TaskType.FIND_OBJECT and not (target or query):
+    if task is TaskType.FIND_OBJECT and not (normalized_target or normalized_query):
         raise HTTPException(status_code=422, detail="物品查找任务必须填写目标物品。")
 
     max_bytes = settings.server.max_upload_mb * 1024 * 1024
@@ -42,18 +45,29 @@ async def analyze_image(
         raise HTTPException(status_code=400, detail="上传的图片为空。")
     if len(content) > max_bytes:
         raise HTTPException(
-            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+            status_code=status.HTTP_413_CONTENT_TOO_LARGE,
             detail=f"图片不能超过{settings.server.max_upload_mb}MB。",
         )
+
+    detected_mime = detect_image_mime(content)
+    if detected_mime is None:
+        raise HTTPException(status_code=400, detail="无法识别图片格式或文件头已损坏。")
+    if detected_mime != content_type:
+        raise HTTPException(status_code=400, detail="图片内容与声明格式不一致。")
 
     encoded = np.frombuffer(content, dtype=np.uint8)
     image = cv2.imdecode(encoded, cv2.IMREAD_COLOR)
     if image is None:
         raise HTTPException(status_code=400, detail="图片损坏或无法解码。")
+    if image_pixel_count(image) > settings.server.max_image_pixels:
+        raise HTTPException(
+            status_code=status.HTTP_413_CONTENT_TOO_LARGE,
+            detail=f"图片像素过高，不能超过{settings.server.max_image_pixels}像素。",
+        )
 
     return await orchestrator.analyze(
         image=image,
         task=task,
-        query=query,
-        target=target or query,
+        query=normalized_query,
+        target=normalized_target or normalized_query,
     )
