@@ -1,0 +1,5 @@
+case_id,scene,task,input_file,source_and_license,expected,actual,passed,latency_ms,failure_type,notes
+SCENE-001,室内走廊,scene_description,待填写,待填写,识别主要场景和关键物体,待测试,待测试,待测试,待测试,不得填写虚构结果
+TEXT-001,门牌文字,read_text,待填写,待填写,按顺序读取清晰文字,待测试,待测试,待测试,待测试,不得填写虚构结果
+FIND-001,桌面找水杯,find_object,待填写,待填写,返回是否出现和大致方向,待测试,待测试,待测试,待测试,不得填写虚构结果
+HARD-001,低光场景,scene_description,待填写,待填写,提示画面过暗或安全降级,待测试,待测试,待测试,input_quality,不得填写虚构结果

@@ -1,0 +1,40 @@
+app:
+  name: AI视觉辅助盲人环境理解系统
+  version: 0.1.0
+  environment: development
+  api_prefix: /api/v1
+
+server:
+  host: 127.0.0.1
+  port: 8000
+  log_level: INFO
+  max_upload_mb: 8
+  allowed_mime_types:
+    - image/jpeg
+    - image/png
+    - image/webp
+
+quality:
+  min_width: 320
+  min_height: 240
+  min_brightness: 25
+  max_brightness: 240
+  min_blur_score: 20
+
+fusion:
+  task_relevance: 0.35
+  importance: 0.25
+  confidence: 0.20
+  novelty: 0.10
+  position: 0.10
+
+narration:
+  max_items: 3
+  low_confidence_threshold: 0.55
+  unavailable_message: 基础框架运行正常，但真实AI能力尚未配置。
+
+providers:
+  detector_enabled: false
+  ocr_enabled: false
+  vision_enabled: false
+  timeout_seconds: 12
