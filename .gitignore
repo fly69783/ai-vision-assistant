@@ -1,0 +1,32 @@
+# Python 缓存
+__pycache__/
+*.py[cod]
+
+# Python/Conda 虚拟环境
+.venv/
+venv/
+env/
+conda-env/
+
+# 密钥和配置
+.env
+.env.*
+!.env.example
+
+# IDE 配置
+.idea/
+.vscode/
+
+# 模型、数据集和运行结果
+*.pt
+*.pth
+*.onnx
+models/
+datasets/
+data/
+runs/
+outputs/
+
+# 系统文件
+.DS_Store
+Thumbs.db
