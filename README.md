@@ -432,8 +432,7 @@ ai-vision-assistant/
 ├─ main.py                 # 本地开发启动入口
 ├─ requirements*.txt       # 运行依赖和开发依赖
 ├─ pyproject.toml          # Python、测试和代码规范配置
-├─ PROJECT_PLAN.md         # 唯一的进度、排期和决策记录
-├─ 项目实施与学习大纲.md    # 两个人怎么学、怎么做、怎么验收
+├─ PROJECT_PLAN.md         # 计划、分工、学习、验收、材料和进度的唯一记录
 └─ README.md
 ```
 
@@ -479,8 +478,7 @@ git push
 
 ## 项目文档
 
-- [完整项目计划](./PROJECT_PLAN.md)：当前状态、功能优先级、8周任务、分工、指标、风险、决策与进度。
-- [实施与学习大纲](./项目实施与学习大纲.md)：用户流程、模块设计、学习路线、替代验证、材料结构与答辩准备。
+- [完整项目计划](./PROJECT_PLAN.md)：当前状态、用户流程、技术要点、学习路线、8周任务、分工、验收、材料、答辩、风险、决策与进度。
 - [文档导航](./docs/README.md)：架构、开发、测试和比赛材料的入口。
 - [系统架构说明](./docs/architecture/overview.md)：代码分层、一次请求的流转过程和扩展原则。
 - [新手启动指南](./docs/development/getting-started.md)：从创建环境到打开测试页面的完整步骤。
