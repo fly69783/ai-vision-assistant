@@ -71,12 +71,18 @@ class ProviderSettings:
     vision_api_url: str = "https://open.bigmodel.cn/api/paas/v4/chat/completions"
     vision_api_key_env: str = "AI_VISION_ZHIPU_API_KEY"
     vision_max_tokens: int = 512
+    detector_model: str = "ssdlite320_mobilenet_v3_large"
+    detector_min_confidence: float = 0.45
+    detector_max_results: int = 10
+    ocr_model: str = "PP-OCRv6-small"
+    ocr_min_confidence: float = 0.55
+    ocr_max_lines: int = 12
 
 
 @dataclass(frozen=True)
 class AppSettings:
     name: str = "AI视觉辅助盲人环境理解系统"
-    version: str = "0.3.0"
+    version: str = "0.4.0"
     environment: str = "development"
     api_prefix: str = "/api/v1"
     server: ServerSettings = field(default_factory=ServerSettings)
@@ -121,6 +127,16 @@ def _env_bool(name: str, default: bool) -> bool:
     raise SettingsError(f"环境变量 {name} 必须是 true 或 false。")
 
 
+def _env_float(name: str, default: float) -> float:
+    raw = os.getenv(name)
+    if raw is None:
+        return default
+    try:
+        return float(raw)
+    except ValueError as exc:
+        raise SettingsError(f"环境变量 {name} 必须是数字。") from exc
+
+
 def _validate(settings: AppSettings) -> None:
     if not settings.api_prefix.startswith("/"):
         raise SettingsError("api_prefix 必须以 / 开头。")
@@ -151,6 +167,14 @@ def _validate(settings: AppSettings) -> None:
         raise SettingsError("vision_api_key_env 不能为空。")
     if settings.providers.vision_max_tokens <= 0:
         raise SettingsError("vision_max_tokens 必须大于0。")
+    if not 0 <= settings.providers.detector_min_confidence <= 1:
+        raise SettingsError("detector_min_confidence 必须在0到1之间。")
+    if settings.providers.detector_max_results <= 0:
+        raise SettingsError("detector_max_results 必须大于0。")
+    if not 0 <= settings.providers.ocr_min_confidence <= 1:
+        raise SettingsError("ocr_min_confidence 必须在0到1之间。")
+    if settings.providers.ocr_max_lines <= 0:
+        raise SettingsError("ocr_max_lines 必须大于0。")
 
 
 def load_settings(config_path: str | Path | None = None) -> AppSettings:
@@ -199,7 +223,7 @@ def load_settings(config_path: str | Path | None = None) -> AppSettings:
     )
     settings = AppSettings(
         name=str(app_data.get("name", "AI视觉辅助盲人环境理解系统")),
-        version=str(app_data.get("version", "0.3.0")),
+        version=str(app_data.get("version", "0.4.0")),
         environment=os.getenv(
             "AI_VISION_ENVIRONMENT", str(app_data.get("environment", "development"))
         ),
@@ -241,6 +265,26 @@ def load_settings(config_path: str | Path | None = None) -> AppSettings:
             vision_max_tokens=_env_int(
                 "AI_VISION_VISION_MAX_TOKENS",
                 int(provider_data.get("vision_max_tokens", 512)),
+            ),
+            detector_model=str(
+                provider_data.get("detector_model", "ssdlite320_mobilenet_v3_large")
+            ),
+            detector_min_confidence=_env_float(
+                "AI_VISION_DETECTOR_MIN_CONFIDENCE",
+                float(provider_data.get("detector_min_confidence", 0.45)),
+            ),
+            detector_max_results=_env_int(
+                "AI_VISION_DETECTOR_MAX_RESULTS",
+                int(provider_data.get("detector_max_results", 10)),
+            ),
+            ocr_model=str(provider_data.get("ocr_model", "PP-OCRv6-small")),
+            ocr_min_confidence=_env_float(
+                "AI_VISION_OCR_MIN_CONFIDENCE",
+                float(provider_data.get("ocr_min_confidence", 0.55)),
+            ),
+            ocr_max_lines=_env_int(
+                "AI_VISION_OCR_MAX_LINES",
+                int(provider_data.get("ocr_max_lines", 12)),
             ),
         ),
     )

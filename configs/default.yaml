@@ -1,6 +1,6 @@
 app:
   name: AI视觉辅助盲人环境理解系统
-  version: 0.3.0
+  version: 0.4.0
   environment: development
   api_prefix: /api/v1
 
@@ -43,3 +43,9 @@ providers:
   vision_api_url: https://open.bigmodel.cn/api/paas/v4/chat/completions
   vision_api_key_env: AI_VISION_ZHIPU_API_KEY
   vision_max_tokens: 512
+  detector_model: ssdlite320_mobilenet_v3_large
+  detector_min_confidence: 0.45
+  detector_max_results: 10
+  ocr_model: PP-OCRv6-small
+  ocr_min_confidence: 0.55
+  ocr_max_lines: 12

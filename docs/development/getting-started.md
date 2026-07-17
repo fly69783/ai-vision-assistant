@@ -21,7 +21,15 @@ python --version
 python -m pip install -r requirements-dev.txt
 ```
 
-`requirements.txt`只含运行需要的包；`requirements-dev.txt`另外包含测试和代码检查工具。
+`requirements.txt`只含基础服务需要的包；`requirements-dev.txt`另外包含测试和代码检查工具。
+
+安装本地目标检测与OCR：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/install_local_ai.ps1 -Enable
+```
+
+这个脚本要求环境中已经安装匹配显卡的Torch和Torchvision，并会安装RapidOCR、ONNX Runtime、缓存模型和保存本地能力开关。完成后关闭并重新打开终端。
 
 ## 4. 检查环境
 
@@ -29,7 +37,13 @@ python -m pip install -r requirements-dev.txt
 python scripts/check_environment.py
 ```
 
-基础检查通过并不代表模型可用。模型状态要看启动后的`/api/v1/health`。
+基础检查通过后，还可以单独验证和预热本地模型：
+
+```powershell
+python scripts/check_local_ai.py
+```
+
+最终能力状态以启动后的`/api/v1/health`为准；正常配置应显示3/3项能力可用。
 
 ## 5. 启动项目
 
@@ -71,7 +85,7 @@ powershell -ExecutionPolicy Bypass -File scripts/run_tests.ps1
 
 ### 页面显示“能力未配置”是不是报错？
 
-不是。这表示基础框架正常，但还没有接入真实检测、OCR或视觉模型。
+不是。这表示对应能力的开关、依赖或密钥不完整。健康检查会分别说明目标检测、OCR和视觉模型缺少什么。
 
 ### 为什么普通PowerShell里找不到conda？
 

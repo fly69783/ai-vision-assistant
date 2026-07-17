@@ -5,6 +5,7 @@ from __future__ import annotations
 import importlib
 import platform
 import sys
+from importlib.metadata import PackageNotFoundError, version
 from pathlib import Path
 
 REQUIRED = {
@@ -17,9 +18,22 @@ REQUIRED = {
     "httpx": "视觉API网络请求",
 }
 
+OPTIONAL_LOCAL_AI = {
+    "torch": "目标检测计算框架",
+    "torchvision": "目标检测模型",
+    "rapidocr": "场景文字识别",
+    "onnxruntime": "OCR推理引擎",
+}
 
-def package_version(module: object) -> str:
-    return str(getattr(module, "__version__", "版本未知"))
+
+def package_version(module: object, distribution: str | None = None) -> str:
+    declared = getattr(module, "__version__", None)
+    if declared is not None:
+        return str(declared)
+    try:
+        return version(distribution or getattr(module, "__name__", ""))
+    except PackageNotFoundError:
+        return "版本未知"
 
 
 def main() -> int:
@@ -45,6 +59,13 @@ def main() -> int:
             message = f"[缺少] {purpose}：{module_name}"
             print(message)
             failures.append(message)
+
+    for module_name, purpose in OPTIONAL_LOCAL_AI.items():
+        try:
+            module = importlib.import_module(module_name)
+            print(f"[本地AI] {purpose}：{module_name} {package_version(module)}")
+        except ImportError:
+            print(f"[可选] 尚未安装{purpose}：{module_name}")
 
     try:
         from core.config import load_settings

@@ -1,6 +1,12 @@
 # 如何接入一个真实AI能力
 
-当前仓库已经包含`core/providers/zhipu_vision.py`作为真实云端视觉Provider示例。下面以尚未接入的目标检测为例说明相同的扩展结构。
+当前仓库已经包含三个真实Provider：
+
+- `core/providers/torchvision_detector.py`：本地目标检测。
+- `core/providers/rapidocr_provider.py`：本地文字识别。
+- `core/providers/zhipu_vision.py`：云端视觉理解。
+
+下面说明后续更换模型或增加新能力时应遵守的统一结构。
 
 ## 第一步：先登记来源
 
@@ -29,7 +35,7 @@ class DetectorProvider(AnalysisProvider):
 
 ## 第三步：替换默认占位器
 
-修改`build_default_registry`的装配代码，把对应`UnavailableProvider`换成真实适配器。模型加载应只发生一次，不要每个请求重新加载。
+修改`build_default_registry`的装配代码，把新适配器注册进去。模型应在Provider实例中缓存，不要每个请求重新加载；同步推理应放到工作线程，避免阻塞FastAPI事件循环。
 
 ## 第四步：增加测试
 
@@ -50,3 +56,11 @@ class DetectorProvider(AnalysisProvider):
 - 测试方式：单元测试使用`httpx.MockTransport`，不会调用真实账号；发布前另做一次人工授权的端到端检查。
 
 请勿在测试代码、请求日志、截图或Git提交中加入真实密钥。
+
+## 已接入的本地Provider
+
+- 目标检测：SSDLite320 MobileNetV3，输出COCO类别、置信度、中文名称和归一化位置框，CUDA可用时自动使用GPU。
+- OCR：RapidOCR的PP-OCRv6-small模型，通过ONNX Runtime CPU推理，输出文字、置信度和文字框。
+- 安装入口：`scripts/install_local_ai.ps1 -Enable`。
+- 验证入口：`scripts/check_local_ai.py`。
+- 自动化测试：注入假预测器和假OCR引擎，不下载权重、不加载真实模型。

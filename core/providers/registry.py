@@ -8,7 +8,8 @@ from core.config.settings import AppSettings
 from core.domain.enums import ProviderName, TaskType
 from core.domain.models import CapabilityStatus
 from core.providers.base import AnalysisProvider
-from core.providers.unavailable import UnavailableProvider
+from core.providers.rapidocr_provider import RapidOCRProvider
+from core.providers.torchvision_detector import TorchvisionDetectorProvider
 from core.providers.zhipu_vision import ZhipuVisionProvider
 
 
@@ -40,25 +41,13 @@ class ProviderRegistry:
         return [self.get(name) for name in mapping[task]]
 
 
-def _reason(name: str, enabled: bool) -> str:
-    if enabled:
-        return f"{name}已在配置中启用，但真实模型适配器尚未接入。"
-    return f"{name}尚未启用。"
-
-
 def build_default_registry(settings: AppSettings) -> ProviderRegistry:
     """根据配置构建能力注册表；没有密钥的能力保持未配置。"""
 
     return ProviderRegistry(
         [
-            UnavailableProvider(
-                ProviderName.DETECTOR,
-                _reason("目标检测", settings.providers.detector_enabled),
-            ),
-            UnavailableProvider(
-                ProviderName.OCR,
-                _reason("OCR", settings.providers.ocr_enabled),
-            ),
+            TorchvisionDetectorProvider(settings.providers),
+            RapidOCRProvider(settings.providers),
             ZhipuVisionProvider(settings.providers),
         ]
     )

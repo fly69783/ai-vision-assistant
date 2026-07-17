@@ -26,7 +26,7 @@ def create_app(
     application = FastAPI(
         title=selected.name,
         version=selected.version,
-        description="环境理解辅助系统基础API；真实AI能力需通过providers适配器接入。",
+        description="环境理解辅助系统API；检测、OCR和视觉能力按providers配置启用。",
         docs_url=f"{selected.api_prefix}/docs",
         redoc_url=f"{selected.api_prefix}/redoc",
     )
