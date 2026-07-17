@@ -12,6 +12,8 @@
 | PP-OCRv6 small模型 | 预训练模型 | RapidOCR 3.9.1内置 | https://rapidai.github.io/RapidOCRDocs/main/install_usage/rapidocr/usage/ | 中文和英文文字检测与识别 | 模型版权归百度，具体比赛使用范围待核对 | 未确认 | 技术主力 |
 | ONNX Runtime | 代码库 | 1.27.0 | https://github.com/microsoft/onnxruntime | OCR CPU推理 | MIT | 待最终核对 | 技术主力 |
 | 智谱GLM-4.5V | 云端模型API | 接入于2026-07-17 | https://docs.bigmodel.cn/cn/guide/models/vlm/glm-4.5v | 场景概述、文字读取回退、物品查找与视觉追问 | 智谱开放平台服务条款，待保存和核对 | 比赛使用尚待按本届规则确认 | 两人共同 |
+| Ollama | 本地模型运行时 | 0.32.1 | https://github.com/ollama/ollama | 在Windows和NVIDIA GPU上运行本地视觉模型 | MIT，最终提交前保存许可证副本 | 待最终核对 | 技术主力 |
+| Qwen3-VL-4B-Instruct Q4_K_M | 预训练视觉语言模型量化权重 | Ollama标签`qwen3-vl:4b-instruct-q4_K_M`，部署于2026-07-17 | https://ollama.com/library/qwen3-vl:4b-instruct-q4_K_M | 本地场景概述、物品查找、视觉问答和OCR回退 | Qwen模型条款/Apache-2.0声明需在最终提交前保存并复核量化分发条款 | 比赛使用尚待按本届规则确认 | 两人共同 |
 
 ## 登记要求
 

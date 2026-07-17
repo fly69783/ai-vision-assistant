@@ -11,7 +11,7 @@
 </div>
 
 > [!IMPORTANT]
-> **当前已接入三项真实AI能力：Torchvision SSDLite本地目标检测、RapidOCR本地文字识别和智谱GLM-4.5V视觉理解。** 网页/PWA支持手机拍照或相册选图、画面质量检查、多模型结构化结果和语音播报。当前功能已经可以形成比赛MVP技术闭环，但准确率、稳定性和响应时间仍需40个固定场景验证。本项目不是导航系统，不得用于道路通行、避障或其他安全决策。
+> **当前已接入四项真实AI能力：Torchvision SSDLite本地目标检测、RapidOCR本地文字识别、Qwen3-VL-4B本地视觉理解和智谱GLM-4.5V云端视觉理解。** 视觉后端支持仅本地、仅云端和本地优先降级三种模式。网页/PWA支持手机拍照或相册选图、画面质量检查、多模型结构化结果和语音播报。当前功能已经可以形成比赛MVP技术闭环，但准确率、稳定性和响应时间仍需40个固定场景验证。本项目不是导航系统，不得用于道路通行、避障或其他安全决策。
 
 ## 目录
 
@@ -37,11 +37,11 @@
 | 可安装、适配手机的高对比度PWA | 摄像头连续视频与目标跟踪 |
 | SSDLite本地目标检测与归一化位置框 | 门、盲道、扶手等自定义类别训练 |
 | RapidOCR本地中英文识别与文字框 | 困难文字场景的系统评测和优化 |
-| GLM-4.5V真实视觉理解与结构化证据 | 经过固定测试集验证的准确率 |
+| Qwen3-VL本地视觉理解、GLM-4.5V可选云端模式与结构化证据 | 经过固定测试集验证的准确率 |
 | 四类任务路由、多模型融合和统一JSON接口 | 本地模型与云端模型的自动切换 |
 | 浏览器自带语音播报 | 可供视障用户实际依赖的产品能力 |
 | 离线外壳、网络恢复和安全响应策略 | 比赛现场可交付的完整MVP |
-| 56项自动化测试和真实模型流程检查 | 原生Android/iOS应用 |
+| 66项自动化测试和真实模型流程检查 | 原生Android/iOS应用 |
 
 当前版本已经完成“图片→质量检查→检测/OCR/视觉理解→证据融合→语音播报”的真实技术闭环。下一阶段重点不是继续堆功能，而是建立固定场景、统计效果、修复失败案例并形成比赛证据。
 
@@ -244,7 +244,7 @@ flowchart TB
 | 深度学习环境 | PyTorch 2.13、Torchvision 0.28 | 本地目标检测和GPU推理 | 已在RTX 5060 CUDA上验证 |
 | 目标检测 | SSDLite320 MobileNetV3 COCO权重 | 找物、位置框和置信度 | 已接入，待固定场景评测和类别扩充 |
 | 中文OCR | RapidOCR 3.9.1、PP-OCRv6-small、ONNX Runtime | 本地读取中英文场景文字 | 已接入CPU版，待困难文字评测 |
-| 视觉理解 | 智谱GLM-4.5V API | 场景概述、文字读取回退、物品查找和追问 | 已接入，待固定测试集验证效果、成本和稳定性 |
+| 视觉理解 | 本地Qwen3-VL-4B Q4_K_M + 智谱GLM-4.5V API | 场景概述、文字读取回退、物品查找和追问 | 两种后端均已接入；本机Qwen已在RTX 5060上验证100% GPU推理 |
 | 结果融合 | 自定义Python规则 | 来源保留、优先级排序和不确定提示 | 基础服务已实现并测试 |
 | 后端 | FastAPI | 提供健康检查、图片分析和接口文档 | 已实现基础版本 |
 | 语音 | 浏览器Web Speech API | 播报分析结果，不增加安装负担 | 已实现基础版本 |
@@ -311,7 +311,7 @@ python scripts\run_fixed_evaluation.py --check-only
 | OpenCV图片读取与质量检查 | ✅ 已完成 | 支持格式、大小、分辨率、亮度和模糊度检查 |
 | FastAPI与网页/PWA界面 | ✅ 已完成 | 可拍照或选图、查看结果、语音播报、安装到桌面并在断网时打开外壳 |
 | 统一数据结构、能力适配器和融合框架 | ✅ 已完成 | Pydantic模型、Provider接口、路由、排序和短句服务可测试 |
-| 自动化与浏览器验证 | ✅ 已完成 | 56项测试通过，`app`与`core`覆盖率90%；目标检测GPU推理、RapidOCR中文截图和GLM-4.5V真实调用均通过 |
+| 自动化与浏览器验证 | ✅ 已完成 | 66项测试通过，`app`与`core`覆盖率89%；目标检测、RapidOCR、Qwen3-VL本地项目API和GLM-4.5V真实调用均通过 |
 | 检测、OCR、视觉理解、TTS独立示例 | ✅ 已完成 | 三项AI Provider和浏览器TTS均已可运行，下一步测量固定场景效果 |
 | 上传图片到语音播报的MVP | 🚧 进行中 | 检测+视觉与OCR+视觉两条真实网页流程已通过，待固定图片连续演示3次并记录结果 |
 | 固定测试集和评测报告 | 🚧 进行中 | 40条清单和评测脚本已完成，等待团队拍摄并登记合法图片 |
@@ -379,6 +379,22 @@ powershell -ExecutionPolicy Bypass -File scripts/install_local_ai.ps1 -Enable
 ```
 
 脚本会安装RapidOCR和ONNX Runtime、缓存SSDLite与PP-OCRv6模型并保存两个能力开关。完成后关闭并重新打开终端。由于RapidOCR声明依赖`opencv-python`，而本项目使用共享同一`cv2`命名空间的`opencv-python-headless`，请使用本脚本安装，不要手工同时安装两个OpenCV发行包。
+
+### 安装本地Qwen3-VL视觉模型
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/install_local_vlm.ps1 -Enable
+```
+
+脚本会安装或复用Ollama，下载约3.3GB的`qwen3-vl:4b-instruct-q4_K_M`，并把项目保存为“仅本地视觉”模式。模型在本机RTX 5060 Laptop 8GB显存上已完成真实图片验证，Ollama报告为100% GPU推理。第一次调用需要加载模型，会明显慢于后续调用。
+
+使用结束后可立即释放显存，不会删除模型文件：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/stop_local_vlm.ps1
+```
+
+可用模式由`AI_VISION_VISION_BACKEND`控制：`ollama`只用本地且不上传图片，`zhipu`只用云端，`hybrid`本地失败时允许把图片发送给云端GLM降级。比赛演示建议默认使用`ollama`，确有联网降级需求且已确认隐私与费用时再选择`hybrid`。
 
 ### 配置视觉API
 

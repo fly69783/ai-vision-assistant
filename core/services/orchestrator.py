@@ -37,9 +37,12 @@ class AnalysisOrchestrator:
     ) -> ProviderResult:
         started = perf_counter()
         try:
+            timeout_seconds = float(
+                getattr(provider, "timeout_seconds", self.settings.providers.timeout_seconds)
+            )
             result = await asyncio.wait_for(
                 provider.analyze(image, context),
-                timeout=self.settings.providers.timeout_seconds,
+                timeout=timeout_seconds,
             )
             return result.model_copy(
                 update={"latency_ms": round((perf_counter() - started) * 1000, 2)}

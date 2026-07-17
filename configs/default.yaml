@@ -1,6 +1,6 @@
 app:
   name: AI视觉辅助盲人环境理解系统
-  version: 0.4.0
+  version: 0.5.0
   environment: development
   api_prefix: /api/v1
 
@@ -43,6 +43,13 @@ providers:
   vision_api_url: https://open.bigmodel.cn/api/paas/v4/chat/completions
   vision_api_key_env: AI_VISION_ZHIPU_API_KEY
   vision_max_tokens: 512
+  # ollama = 仅本地；zhipu = 仅云端；hybrid = 本地优先，失败时云端降级。
+  vision_backend: zhipu
+  local_vision_enabled: false
+  local_vision_model: qwen3-vl:4b-instruct-q4_K_M
+  local_vision_api_url: http://127.0.0.1:11434/api/chat
+  local_vision_timeout_seconds: 120
+  local_vision_keep_alive: 5m
   detector_model: ssdlite320_mobilenet_v3_large
   detector_min_confidence: 0.45
   detector_max_results: 10

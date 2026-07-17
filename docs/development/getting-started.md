@@ -31,6 +31,20 @@ powershell -ExecutionPolicy Bypass -File scripts/install_local_ai.ps1 -Enable
 
 这个脚本要求环境中已经安装匹配显卡的Torch和Torchvision，并会安装RapidOCR、ONNX Runtime、缓存模型和保存本地能力开关。完成后关闭并重新打开终端。
 
+安装本地Qwen3-VL视觉理解模型：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/install_local_vlm.ps1 -Enable
+```
+
+脚本会安装或复用Ollama，下载`qwen3-vl:4b-instruct-q4_K_M`（约3.3GB），并把项目切换为仅本地视觉模式。完成后重开终端。第一次分析需要把模型加载到显卡，通常明显慢于后续请求。
+
+不再使用时可释放模型占用的显存，权重仍保留在硬盘：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/stop_local_vlm.ps1
+```
+
 ## 4. 检查环境
 
 ```powershell
@@ -86,6 +100,10 @@ powershell -ExecutionPolicy Bypass -File scripts/run_tests.ps1
 ### 页面显示“能力未配置”是不是报错？
 
 不是。这表示对应能力的开关、依赖或密钥不完整。健康检查会分别说明目标检测、OCR和视觉模型缺少什么。
+
+### 本地Qwen会不会一直占用显存？
+
+不会永久占用。默认一次请求后保留5分钟以加快连续追问，之后Ollama会自动卸载；也可以随时运行`stop_local_vlm.ps1`立即释放。Ollama后台服务本身占用少量内存，3.3GB模型文件会一直保留在硬盘。
 
 ### 为什么普通PowerShell里找不到conda？
 

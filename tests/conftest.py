@@ -11,6 +11,8 @@ def disable_live_ai_api(monkeypatch: pytest.MonkeyPatch) -> None:
     """自动化测试不得读取真实密钥或调用计费API。"""
 
     monkeypatch.setenv("AI_VISION_VISION_ENABLED", "false")
+    monkeypatch.setenv("AI_VISION_LOCAL_VISION_ENABLED", "false")
+    monkeypatch.setenv("AI_VISION_VISION_BACKEND", "zhipu")
     monkeypatch.setenv("AI_VISION_DETECTOR_ENABLED", "false")
     monkeypatch.setenv("AI_VISION_OCR_ENABLED", "false")
     monkeypatch.delenv("AI_VISION_ZHIPU_API_KEY", raising=False)

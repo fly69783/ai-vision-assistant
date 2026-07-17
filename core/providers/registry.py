@@ -8,6 +8,8 @@ from core.config.settings import AppSettings
 from core.domain.enums import ProviderName, TaskType
 from core.domain.models import CapabilityStatus
 from core.providers.base import AnalysisProvider
+from core.providers.fallback_vision import FallbackVisionProvider
+from core.providers.ollama_vision import OllamaVisionProvider
 from core.providers.rapidocr_provider import RapidOCRProvider
 from core.providers.torchvision_detector import TorchvisionDetectorProvider
 from core.providers.zhipu_vision import ZhipuVisionProvider
@@ -44,10 +46,18 @@ class ProviderRegistry:
 def build_default_registry(settings: AppSettings) -> ProviderRegistry:
     """根据配置构建能力注册表；没有密钥的能力保持未配置。"""
 
+    local_vision = OllamaVisionProvider(settings.providers)
+    cloud_vision = ZhipuVisionProvider(settings.providers)
+    vision_backends: dict[str, AnalysisProvider] = {
+        "ollama": local_vision,
+        "zhipu": cloud_vision,
+        "hybrid": FallbackVisionProvider(local_vision, cloud_vision),
+    }
+
     return ProviderRegistry(
         [
             TorchvisionDetectorProvider(settings.providers),
             RapidOCRProvider(settings.providers),
-            ZhipuVisionProvider(settings.providers),
+            vision_backends[settings.providers.vision_backend],
         ]
     )

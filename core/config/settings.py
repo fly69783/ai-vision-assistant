@@ -71,6 +71,12 @@ class ProviderSettings:
     vision_api_url: str = "https://open.bigmodel.cn/api/paas/v4/chat/completions"
     vision_api_key_env: str = "AI_VISION_ZHIPU_API_KEY"
     vision_max_tokens: int = 512
+    vision_backend: str = "zhipu"
+    local_vision_enabled: bool = False
+    local_vision_model: str = "qwen3-vl:4b-instruct-q4_K_M"
+    local_vision_api_url: str = "http://127.0.0.1:11434/api/chat"
+    local_vision_timeout_seconds: float = 120.0
+    local_vision_keep_alive: str = "5m"
     detector_model: str = "ssdlite320_mobilenet_v3_large"
     detector_min_confidence: float = 0.45
     detector_max_results: int = 10
@@ -82,7 +88,7 @@ class ProviderSettings:
 @dataclass(frozen=True)
 class AppSettings:
     name: str = "AI视觉辅助盲人环境理解系统"
-    version: str = "0.4.0"
+    version: str = "0.5.0"
     environment: str = "development"
     api_prefix: str = "/api/v1"
     server: ServerSettings = field(default_factory=ServerSettings)
@@ -167,6 +173,16 @@ def _validate(settings: AppSettings) -> None:
         raise SettingsError("vision_api_key_env 不能为空。")
     if settings.providers.vision_max_tokens <= 0:
         raise SettingsError("vision_max_tokens 必须大于0。")
+    if settings.providers.vision_backend not in {"ollama", "zhipu", "hybrid"}:
+        raise SettingsError("vision_backend 必须是 ollama、zhipu 或 hybrid。")
+    if not settings.providers.local_vision_model.strip():
+        raise SettingsError("local_vision_model 不能为空。")
+    if not settings.providers.local_vision_api_url.startswith(
+        ("http://127.0.0.1:", "http://localhost:")
+    ):
+        raise SettingsError("local_vision_api_url 只能使用本机 127.0.0.1 或 localhost。")
+    if settings.providers.local_vision_timeout_seconds <= 0:
+        raise SettingsError("local_vision_timeout_seconds 必须大于0。")
     if not 0 <= settings.providers.detector_min_confidence <= 1:
         raise SettingsError("detector_min_confidence 必须在0到1之间。")
     if settings.providers.detector_max_results <= 0:
@@ -223,7 +239,7 @@ def load_settings(config_path: str | Path | None = None) -> AppSettings:
     )
     settings = AppSettings(
         name=str(app_data.get("name", "AI视觉辅助盲人环境理解系统")),
-        version=str(app_data.get("version", "0.4.0")),
+        version=str(app_data.get("version", "0.5.0")),
         environment=os.getenv(
             "AI_VISION_ENVIRONMENT", str(app_data.get("environment", "development"))
         ),
@@ -265,6 +281,38 @@ def load_settings(config_path: str | Path | None = None) -> AppSettings:
             vision_max_tokens=_env_int(
                 "AI_VISION_VISION_MAX_TOKENS",
                 int(provider_data.get("vision_max_tokens", 512)),
+            ),
+            vision_backend=os.getenv(
+                "AI_VISION_VISION_BACKEND",
+                str(provider_data.get("vision_backend", "zhipu")),
+            ).strip().lower(),
+            local_vision_enabled=_env_bool(
+                "AI_VISION_LOCAL_VISION_ENABLED",
+                bool(provider_data.get("local_vision_enabled", False)),
+            ),
+            local_vision_model=os.getenv(
+                "AI_VISION_LOCAL_VISION_MODEL",
+                str(
+                    provider_data.get(
+                        "local_vision_model", "qwen3-vl:4b-instruct-q4_K_M"
+                    )
+                ),
+            ),
+            local_vision_api_url=os.getenv(
+                "AI_VISION_LOCAL_VISION_API_URL",
+                str(
+                    provider_data.get(
+                        "local_vision_api_url", "http://127.0.0.1:11434/api/chat"
+                    )
+                ),
+            ),
+            local_vision_timeout_seconds=_env_float(
+                "AI_VISION_LOCAL_VISION_TIMEOUT_SECONDS",
+                float(provider_data.get("local_vision_timeout_seconds", 120.0)),
+            ),
+            local_vision_keep_alive=os.getenv(
+                "AI_VISION_LOCAL_VISION_KEEP_ALIVE",
+                str(provider_data.get("local_vision_keep_alive", "5m")),
             ),
             detector_model=str(
                 provider_data.get("detector_model", "ssdlite320_mobilenet_v3_large")
