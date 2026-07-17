@@ -1,6 +1,13 @@
 # Python 缓存
 __pycache__/
 *.py[cod]
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.playwright-cli/
+.coverage
+htmlcov/
+coverage.xml
 
 # Python/Conda 虚拟环境
 .venv/
@@ -26,6 +33,13 @@ datasets/
 data/
 runs/
 outputs/
+output/
+logs/
+
+# 构建产物
+build/
+dist/
+*.egg-info/
 
 # 系统文件
 .DS_Store
