@@ -9,6 +9,7 @@ from core.domain.enums import ProviderName, TaskType
 from core.domain.models import CapabilityStatus
 from core.providers.base import AnalysisProvider
 from core.providers.unavailable import UnavailableProvider
+from core.providers.zhipu_vision import ZhipuVisionProvider
 
 
 class ProviderRegistry:
@@ -32,7 +33,7 @@ class ProviderRegistry:
                 ProviderName.OCR,
                 ProviderName.VISION,
             ],
-            TaskType.READ_TEXT: [ProviderName.OCR],
+            TaskType.READ_TEXT: [ProviderName.OCR, ProviderName.VISION],
             TaskType.FIND_OBJECT: [ProviderName.DETECTOR, ProviderName.VISION],
             TaskType.VISUAL_QUESTION: [ProviderName.VISION],
         }
@@ -46,7 +47,7 @@ def _reason(name: str, enabled: bool) -> str:
 
 
 def build_default_registry(settings: AppSettings) -> ProviderRegistry:
-    """构建安全的默认注册表；所有能力都明确处于未配置状态。"""
+    """根据配置构建能力注册表；没有密钥的能力保持未配置。"""
 
     return ProviderRegistry(
         [
@@ -58,9 +59,6 @@ def build_default_registry(settings: AppSettings) -> ProviderRegistry:
                 ProviderName.OCR,
                 _reason("OCR", settings.providers.ocr_enabled),
             ),
-            UnavailableProvider(
-                ProviderName.VISION,
-                _reason("视觉理解", settings.providers.vision_enabled),
-            ),
+            ZhipuVisionProvider(settings.providers),
         ]
     )

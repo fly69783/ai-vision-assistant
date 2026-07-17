@@ -6,6 +6,14 @@ import pytest
 from core.config import AppSettings, load_settings
 
 
+@pytest.fixture(autouse=True)
+def disable_live_ai_api(monkeypatch: pytest.MonkeyPatch) -> None:
+    """自动化测试不得读取真实密钥或调用计费API。"""
+
+    monkeypatch.setenv("AI_VISION_VISION_ENABLED", "false")
+    monkeypatch.delenv("AI_VISION_ZHIPU_API_KEY", raising=False)
+
+
 @pytest.fixture
 def settings() -> AppSettings:
     return load_settings()

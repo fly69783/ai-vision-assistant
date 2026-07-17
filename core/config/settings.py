@@ -58,7 +58,7 @@ class FusionSettings:
 class NarrationSettings:
     max_items: int = 3
     low_confidence_threshold: float = 0.55
-    unavailable_message: str = "基础框架运行正常，但真实AI能力尚未配置。"
+    unavailable_message: str = "当前任务所需的AI能力尚未配置。"
 
 
 @dataclass(frozen=True)
@@ -66,13 +66,17 @@ class ProviderSettings:
     detector_enabled: bool = False
     ocr_enabled: bool = False
     vision_enabled: bool = False
-    timeout_seconds: float = 12.0
+    timeout_seconds: float = 25.0
+    vision_model: str = "glm-4.5v"
+    vision_api_url: str = "https://open.bigmodel.cn/api/paas/v4/chat/completions"
+    vision_api_key_env: str = "AI_VISION_ZHIPU_API_KEY"
+    vision_max_tokens: int = 512
 
 
 @dataclass(frozen=True)
 class AppSettings:
     name: str = "AI视觉辅助盲人环境理解系统"
-    version: str = "0.2.0"
+    version: str = "0.3.0"
     environment: str = "development"
     api_prefix: str = "/api/v1"
     server: ServerSettings = field(default_factory=ServerSettings)
@@ -105,6 +109,18 @@ def _env_int(name: str, default: int) -> int:
         raise SettingsError(f"环境变量 {name} 必须是整数。") from exc
 
 
+def _env_bool(name: str, default: bool) -> bool:
+    raw = os.getenv(name)
+    if raw is None:
+        return default
+    normalized = raw.strip().lower()
+    if normalized in {"1", "true", "yes", "on"}:
+        return True
+    if normalized in {"0", "false", "no", "off"}:
+        return False
+    raise SettingsError(f"环境变量 {name} 必须是 true 或 false。")
+
+
 def _validate(settings: AppSettings) -> None:
     if not settings.api_prefix.startswith("/"):
         raise SettingsError("api_prefix 必须以 / 开头。")
@@ -127,6 +143,14 @@ def _validate(settings: AppSettings) -> None:
         raise SettingsError("max_items 必须大于0。")
     if settings.providers.timeout_seconds <= 0:
         raise SettingsError("模型超时时间必须大于0。")
+    if not settings.providers.vision_model.strip():
+        raise SettingsError("vision_model 不能为空。")
+    if not settings.providers.vision_api_url.startswith("https://"):
+        raise SettingsError("vision_api_url 必须使用 https://。")
+    if not settings.providers.vision_api_key_env.strip():
+        raise SettingsError("vision_api_key_env 不能为空。")
+    if settings.providers.vision_max_tokens <= 0:
+        raise SettingsError("vision_max_tokens 必须大于0。")
 
 
 def load_settings(config_path: str | Path | None = None) -> AppSettings:
@@ -175,7 +199,7 @@ def load_settings(config_path: str | Path | None = None) -> AppSettings:
     )
     settings = AppSettings(
         name=str(app_data.get("name", "AI视觉辅助盲人环境理解系统")),
-        version=str(app_data.get("version", "0.2.0")),
+        version=str(app_data.get("version", "0.3.0")),
         environment=os.getenv(
             "AI_VISION_ENVIRONMENT", str(app_data.get("environment", "development"))
         ),
@@ -184,7 +208,41 @@ def load_settings(config_path: str | Path | None = None) -> AppSettings:
         quality=QualitySettings(**quality_data),
         fusion=FusionSettings(**fusion_data),
         narration=NarrationSettings(**narration_data),
-        providers=ProviderSettings(**provider_data),
+        providers=ProviderSettings(
+            detector_enabled=_env_bool(
+                "AI_VISION_DETECTOR_ENABLED",
+                bool(provider_data.get("detector_enabled", False)),
+            ),
+            ocr_enabled=_env_bool(
+                "AI_VISION_OCR_ENABLED",
+                bool(provider_data.get("ocr_enabled", False)),
+            ),
+            vision_enabled=_env_bool(
+                "AI_VISION_VISION_ENABLED",
+                bool(provider_data.get("vision_enabled", False)),
+            ),
+            timeout_seconds=float(provider_data.get("timeout_seconds", 25.0)),
+            vision_model=os.getenv(
+                "AI_VISION_VISION_MODEL",
+                str(provider_data.get("vision_model", "glm-4.5v")),
+            ),
+            vision_api_url=os.getenv(
+                "AI_VISION_VISION_API_URL",
+                str(
+                    provider_data.get(
+                        "vision_api_url",
+                        "https://open.bigmodel.cn/api/paas/v4/chat/completions",
+                    )
+                ),
+            ),
+            vision_api_key_env=str(
+                provider_data.get("vision_api_key_env", "AI_VISION_ZHIPU_API_KEY")
+            ),
+            vision_max_tokens=_env_int(
+                "AI_VISION_VISION_MAX_TOKENS",
+                int(provider_data.get("vision_max_tokens", 512)),
+            ),
+        ),
     )
     _validate(settings)
     return settings

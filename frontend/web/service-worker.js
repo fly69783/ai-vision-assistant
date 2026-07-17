@@ -1,4 +1,4 @@
-const CACHE_NAME = "ai-vision-shell-v2";
+const CACHE_NAME = "ai-vision-shell-v3";
 const APP_SHELL = [
   "/",
   "/styles.css",

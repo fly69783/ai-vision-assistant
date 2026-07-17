@@ -14,6 +14,7 @@ REQUIRED = {
     "cv2": "OpenCV图像处理",
     "numpy": "NumPy数组",
     "yaml": "YAML配置",
+    "httpx": "视觉API网络请求",
 }
 
 

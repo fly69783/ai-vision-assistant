@@ -1,6 +1,6 @@
 # 如何接入一个真实AI能力
 
-下面以目标检测为例，只说明结构，不指定最终模型。
+当前仓库已经包含`core/providers/zhipu_vision.py`作为真实云端视觉Provider示例。下面以尚未接入的目标检测为例说明相同的扩展结构。
 
 ## 第一步：先登记来源
 
@@ -40,3 +40,13 @@ class DetectorProvider(AnalysisProvider):
 ## 第五步：更新文档
 
 只有真实代码和测试证据齐全后，才能把README中的状态从“未配置”改为“已接入”。
+
+## 已接入的智谱视觉Provider
+
+- 模型：`glm-4.5v`。
+- 密钥环境变量：`AI_VISION_ZHIPU_API_KEY`。
+- 启用开关：`AI_VISION_VISION_ENABLED=true`。
+- 调用方式：后端使用Bearer认证发送Base64图片，前端永远拿不到API密钥。
+- 测试方式：单元测试使用`httpx.MockTransport`，不会调用真实账号；发布前另做一次人工授权的端到端检查。
+
+请勿在测试代码、请求日志、截图或Git提交中加入真实密钥。

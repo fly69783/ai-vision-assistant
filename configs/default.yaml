@@ -1,6 +1,6 @@
 app:
   name: AI视觉辅助盲人环境理解系统
-  version: 0.2.0
+  version: 0.3.0
   environment: development
   api_prefix: /api/v1
 
@@ -32,10 +32,14 @@ fusion:
 narration:
   max_items: 3
   low_confidence_threshold: 0.55
-  unavailable_message: 基础框架运行正常，但真实AI能力尚未配置。
+  unavailable_message: 当前任务所需的AI能力尚未配置。
 
 providers:
   detector_enabled: false
   ocr_enabled: false
   vision_enabled: false
-  timeout_seconds: 12
+  timeout_seconds: 25
+  vision_model: glm-4.5v
+  vision_api_url: https://open.bigmodel.cn/api/paas/v4/chat/completions
+  vision_api_key_env: AI_VISION_ZHIPU_API_KEY
+  vision_max_tokens: 512
